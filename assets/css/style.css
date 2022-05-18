@@ -1,0 +1,81 @@
+body {
+    background: #ffffff;
+}
+
+#login {
+    display: block;
+}
+
+.profile-menu .dropdown-menu {
+    right: 0;
+    left: unset;
+}
+
+.profile-menu .fa-fw {
+    margin-right: 10px;
+}
+
+.toggle-change::after {
+    border-top: 0;
+    border-bottom: 0.3em solid;
+}
+
+#profilePhoto,
+#Critical,
+#Normal,
+#Medium {
+    display: none;
+}
+
+#Critical:checked+label,
+#Critical:hover+label {
+    background: #FE4B4B;
+    color: white;
+}
+
+#Critical+label {
+    border: 1px solid white;
+}
+
+#Medium:checked+label,
+#Medium:hover+label {
+    background: #feaa4b;
+    color: white;
+}
+
+#Medium+label {
+    border: 1px solid white;
+}
+
+#Normal:checked+label,
+#Normal:hover+label {
+    background: #00AF53;
+    color: white;
+}
+
+#Normal+label {
+    border: 1px solid white;
+}
+
+#navbar,
+#patient {
+    display: none;
+}
+
+.popup {
+    background: none;
+}
+
+.bg-secondary,
+#login,
+.navbar-dark,
+.navbar-brand,
+.nav-link {
+    background: #ede6f8 !important;
+    color: #6c757d !important;
+    font-weight: 450 !important;
+}
+
+.active {
+    color: #404040 !important;
+}
