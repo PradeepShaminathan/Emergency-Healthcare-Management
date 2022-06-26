@@ -154,7 +154,7 @@ const logout = () => {
 // Function to register patient
 const addPatientDetails = async() => {
     const params = fetchInputs("patient");
-    params.creatorEmail = userDetails.email;
+    params.creatorEmail = userDetails.email + '÷' + userDetails.roleConfig.name;
     params.creatorName = userDetails.fullName;
     const response = await fetch("./server/createPatient.php", {
         method: 'POST',
@@ -279,10 +279,12 @@ const loadPatients = async(patients, hospital) => {
     allocatedBeds = userDetails.roleConfig.bedCount;
     await patients.map((patient, i) => {
         allocatedBeds = patient.allocatedHospitalId === userDetails.roleConfig.roleId ? allocatedBeds - 1 : allocatedBeds;
+        let creatorName = patient.creatorEmail.split('÷');
         tbodyHTML += `<tr>
                         <td>${i + 1}</td>
                         <td>${patient.fullName}</td>
                         <td>${patient.recordId}</td>
+                        ${ hospital ? `<td>${creatorName[1] ? creatorName[1] : creatorName[0]}</td>` : ``}
                         <td>${patient.symptoms}</td>
                         <td>${patient.date}</td>
                         <td>${patient.severity}</td>
