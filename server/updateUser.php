@@ -6,17 +6,17 @@ $response = OpenCon();
 validateRequest($response, 'POST');
 $reqBody = decodeRequest($response);
 
-if (empty($reqBody->recordId) || empty($reqBody->allocatedHospitalId))
+if (empty($reqBody->recordId) || empty($reqBody->roleConfig))
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryUpdatePatient = "UPDATE `patients` SET `allocatedHospitalId` = '$reqBody->allocatedHospitalId' WHERE `recordId` = '$reqBody->recordId';";
+    $queryUpdateUser = "UPDATE `users` SET `roleConfig` = '$reqBody->roleConfig' WHERE `recordId` = '$reqBody->recordId';";
     try {
-        $response->connection->query($queryUpdatePatient);
-        setResponseStatus($response, true, "Patient updation successful");
+        $response->connection->query($queryUpdateUser);
+        setResponseStatus($response, true, "User updation successful");
     }
     catch (Exception $e) {
-        setResponseStatus($response, false, "Error occured while updating patient");
+        setResponseStatus($response, false, "Error occured while updating user");
         setResponseError($response, $e->getCode(), $e->getMessage());
     }
     finally {

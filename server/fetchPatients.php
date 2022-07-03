@@ -6,9 +6,14 @@ $response = OpenCon();
 validateRequest($response, 'POST');
 $reqBody = decodeRequest($response);
 
-$queryFetchPatients = "SELECT * FROM patientDetails WHERE assignedHospitalId='$reqBody->assignedHospitalId';";
-if (!empty($reqBody->creatorEmail)) {
-    $queryFetchPatients = "SELECT * FROM patientDetails WHERE creatorEmail='$reqBody->creatorEmail';";
+$queryFetchPatients = "SELECT * FROM patients;";
+
+if (!empty($reqBody->assignedHospitalId)) {
+    $queryFetchPatients = "SELECT * FROM patients WHERE assignedHospitalId='$reqBody->assignedHospitalId' ORDER BY recordCreationTime;";
+}
+
+if (!empty($reqBody->relatedUserRecordId)) {
+    $queryFetchPatients = "SELECT * FROM patients WHERE relatedUserRecordId='$reqBody->relatedUserRecordId' ORDER BY recordCreationTime;";
 }
 
 if ($response->success) {

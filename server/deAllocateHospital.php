@@ -6,11 +6,11 @@ $response = OpenCon();
 validateRequest($response, 'POST');
 $reqBody = decodeRequest($response);
 
-if (empty($reqBody->recordId) || empty($reqBody->allocatedHospitalId))
+if (empty($reqBody->recordId))
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryUpdatePatient = "UPDATE `patients` SET `allocatedHospitalId` = '$reqBody->allocatedHospitalId' WHERE `recordId` = '$reqBody->recordId';";
+    $queryUpdatePatient = "UPDATE `patients` SET `allocatedHospitalId` = NULL WHERE `recordId` = '$reqBody->recordId';";
     try {
         $response->connection->query($queryUpdatePatient);
         setResponseStatus($response, true, "Patient updation successful");

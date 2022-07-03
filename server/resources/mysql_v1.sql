@@ -3,35 +3,37 @@ CREATE DATABASE IF NOT EXISTS EHCMS;
 
 -- creating users table
 CREATE TABLE IF NOT EXISTS `EHCMS`.`users` (
-  `recordId` int(50) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `recordId` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` varchar(20) NOT NULL,
   `firstName` varchar(50) NOT NULL,
   `lastName` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
   `role` varchar(50) NOT NULL,
-  `userCreatedTime` varchar(50) NOT NULL,
-  `roleConfig` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `roleConfig` TEXT NOT NULL,
+  `recordCreatedTime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- creating patientDetails table
-CREATE TABLE IF NOT EXISTS `EHCMS`.`patientDetails` (
-  `date` varchar(50) NOT NULL,
-  `place` varchar(50) NOT NULL,
-  `symptoms` varchar(500) NOT NULL,
-  `severity` varchar(20) NOT NULL,
-  `gender` varchar(10) NOT NULL,
-  `address` varchar(250) NOT NULL,
-  `fullName` varchar(50) NOT NULL,
-  `phoneNumber` varchar(15) NOT NULL,
-  `dateOfBirth` varchar(20) NOT NULL,
-  `bloodGroup` varchar(5) NOT NULL,
-  `medicalReportFile` json DEFAULT NULL,
-  `photoFile` json DEFAULT NULL,
-  `recordId` int(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `creatorEmail` varchar(50) NOT NULL,
-  `recordCreationTime` varchar(50) NOT NULL,
-  `creatorName` varchar(50) NOT NULL,
-  `allocatedHospitalId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-  `assignedHospitalId` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- creating patients table
+CREATE TABLE IF NOT EXISTS `EHCMS`.`patients`(
+    `recordId` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `date` VARCHAR(50) NOT NULL,
+    `place` VARCHAR(50) NOT NULL,
+    `symptoms` VARCHAR(500) NOT NULL,
+    `severity` VARCHAR(20) NOT NULL,
+    `gender` VARCHAR(10) NOT NULL,
+    `address` VARCHAR(250) NOT NULL,
+    `fullName` VARCHAR(50) NOT NULL,
+    `phoneNumber` VARCHAR(15) NOT NULL,
+    `dateOfBirth` VARCHAR(20) NOT NULL,
+    `bloodGroup` VARCHAR(5) NOT NULL,
+    `medicalReportFile` JSON DEFAULT NULL,
+    `profileImage` JSON DEFAULT NULL,
+    `relatedUserRecordId` int NOT NULL,
+    `recordCreatedBy` VARCHAR(100) NOT NULL,
+    `allocatedHospitalId` VARCHAR(50) DEFAULT NULL,
+    `assignedHospitalId` VARCHAR(50) DEFAULT NULL,
+    `recordCreationTime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `recordLastUpdatedTime` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(`relatedUserRecordId`) REFERENCES users(`recordId`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8;
