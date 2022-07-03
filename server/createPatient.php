@@ -6,11 +6,11 @@ $response = OpenCon();
 validateRequest($response, 'POST');
 $reqBody = decodeRequest($response);
 
-if (empty($reqBody->date) || empty($reqBody->place) || empty($reqBody->symptoms) || empty($reqBody->severity) || empty($reqBody->gender) || empty($reqBody->address) || empty($reqBody->name) || empty($reqBody->phoneNumber) || empty($reqBody->dob) || empty($reqBody->bloodGroup) || empty($reqBody->creatorEmail) || empty($reqBody->creatorName || empty($reqBody->assignedHospital)))
+if (empty($reqBody->date) || empty($reqBody->place) || empty($reqBody->symptoms) || empty($reqBody->severity) || empty($reqBody->gender) || empty($reqBody->address) || empty($reqBody->name) || empty($reqBody->phoneNumber) || empty($reqBody->dob) || empty($reqBody->bloodGroup) || empty($reqBody->relatedUserRecordId) || empty($reqBody->assignedHospital) || empty($reqBody->recordCreatedBy))
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryCreatePatient = "INSERT INTO `patientDetails` (`date`, `place`, `symptoms`, `severity`, `gender`, `address`, `fullName`, `phoneNumber`, `dateOfBirth`, `bloodGroup`, `medicalReportFile`, `photoFile`, `creatorEmail`, `creatorName`, `recordCreationTime`, `assignedHospitalId`) VALUES ('$reqBody->date', '$reqBody->place', '$reqBody->symptoms', '$reqBody->severity', '$reqBody->gender', '$reqBody->address', '$reqBody->name', '$reqBody->phoneNumber', '$reqBody->dob', '$reqBody->bloodGroup', '{}', '{}', '$reqBody->creatorEmail', '$reqBody->creatorName','$currentTimeStamp', '$reqBody->assignedHospital');";
+    $queryCreatePatient = "INSERT INTO `patients` (`date`, `place`, `symptoms`, `severity`, `gender`, `address`, `fullName`, `phoneNumber`, `dateOfBirth`, `bloodGroup`, `medicalReportFile`, `profileImage`, `relatedUserRecordId`, `recordCreatedBy`, `assignedHospitalId`) VALUES ('$reqBody->date', '$reqBody->place', '$reqBody->symptoms', '$reqBody->severity', '$reqBody->gender', '$reqBody->address', '$reqBody->name', '$reqBody->phoneNumber', '$reqBody->dob', '$reqBody->bloodGroup', '{}', '{}', '$reqBody->relatedUserRecordId', '$reqBody->recordCreatedBy', '$reqBody->assignedHospital');";
     try {
         $response->connection->query($queryCreatePatient);
         setResponseStatus($response, true, "Patient creation successful");

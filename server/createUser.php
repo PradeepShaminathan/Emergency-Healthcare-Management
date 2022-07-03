@@ -10,7 +10,7 @@ if (empty($reqBody->email) || empty($reqBody->password) || empty($reqBody->userI
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryCreateUser = "INSERT INTO users (userId, email, password, firstName, lastName, role, userCreatedTime, roleConfig) VALUES ('$reqBody->userId', '$reqBody->email', '$reqBody->password', '$reqBody->firstName', '$reqBody->lastName', '$reqBody->role', '$currentTimeStamp', '$reqBody->roleConfig')";
+    $queryCreateUser = "INSERT INTO users (userId, email, password, firstName, lastName, role, roleConfig) VALUES ('$reqBody->userId', '$reqBody->email', '$reqBody->password', '$reqBody->firstName', '$reqBody->lastName', '$reqBody->role', '$reqBody->roleConfig')";
     try {
         $response->connection->query($queryCreateUser);
         setResponseStatus($response, true, "User creation successful");

@@ -1,5 +1,4 @@
 let userDetails;
-let allocatedBeds = 0;
 let patientsDataTable;
 let patientsBedDataTable;
 
@@ -57,12 +56,17 @@ const fetchInputs = (type) => {
                 inputFields.lastName = document.querySelector("#lastName").value;
                 inputFields.roleConfig = inputFields.role === "Hospital" ? JSON.stringify({
                     role: "Hospital",
-                    roleId: "H-00" + inputFields.userId,
+                    roleId: "H-0" + inputFields.userId,
                     name: document.querySelector("#hospitalName").value,
-                    bedCount: document.querySelector("#bedCount").value,
+                    totalCritical: document.querySelector("#bedCountCritical").value,
+                    totalMedium: document.querySelector("#bedCountMedium").value,
+                    totalNormal: document.querySelector("#bedCountNormal").value,
+                    availableCritical: document.querySelector("#bedCountCritical").value,
+                    availableMedium: document.querySelector("#bedCountMedium").value,
+                    availableNormal: document.querySelector("#bedCountNormal").value
                 }) : JSON.stringify({
                     role: "Clinic",
-                    rolelId: "C-00" + inputFields.userId,
+                    rolelId: "C-0" + inputFields.userId,
                     name: document.querySelector("#hospitalName").value
                 });
                 break;
@@ -108,13 +112,21 @@ const authenticateUser = async() => {
         document.querySelector("#login").style.display = 'none';
         document.querySelector("#navbar").style.display = 'block';
         document.querySelector("#patient").style.display = 'block';
+        JSON.parse(userDetails.roleConfig)
+        userDetails.roleConfig = JSON.parse(userDetails.roleConfig);
         if (userDetails.role === "Hospital") {
-            JSON.parse(userDetails.roleConfig)
-            userDetails.roleConfig = JSON.parse(userDetails.roleConfig);
             document.querySelector("#patientBedLink").hidden = false;
             document.querySelector("#hospitalNameDisplay").innerText = userDetails.roleConfig.name;
             document.querySelector("#hospitalIdDisplay").innerText = userDetails.roleConfig.roleId;
-            document.querySelector("#totalBedsDisplay").innerText = userDetails.roleConfig.bedCount;
+            document.querySelector("#totalCritical").innerText = userDetails.roleConfig.totalCritical;
+            document.querySelector("#totalMedium").innerText = userDetails.roleConfig.totalMedium;
+            document.querySelector("#totalNormal").innerText = userDetails.roleConfig.totalNormal;
+            document.querySelector("#availableCritical").innerText = userDetails.roleConfig.availableCritical;
+            document.querySelector("#availableMedium").innerText = userDetails.roleConfig.availableMedium;
+            document.querySelector("#availableNormal").innerText = userDetails.roleConfig.availableNormal;
+            document.querySelector("#allocatedCritical").innerText = userDetails.roleConfig.totalCritical - userDetails.roleConfig.availableCritical;
+            document.querySelector("#allocatedMedium").innerText = userDetails.roleConfig.totalMedium - userDetails.roleConfig.availableMedium;
+            document.querySelector("#allocatedNormal").innerText = userDetails.roleConfig.totalNormal - userDetails.roleConfig.availableNormal;
         }
         clearInputs();
     } else {
@@ -154,8 +166,8 @@ const logout = () => {
 // Function to register patient
 const addPatientDetails = async() => {
     const params = fetchInputs("patient");
-    params.creatorEmail = userDetails.email + '÷' + userDetails.roleConfig.name;
-    params.creatorName = userDetails.fullName;
+    params.relatedUserRecordId = userDetails.recordId;
+    params.recordCreatedBy = userDetails.fullName;
     const response = await fetch("./server/createPatient.php", {
         method: 'POST',
         body: JSON.stringify(params),
@@ -177,7 +189,7 @@ const addPatientDetails = async() => {
 const fetchPatients = async(allPatients) => {
     const response = await fetch("./server/fetchPatients.php", {
         method: 'POST',
-        body: JSON.stringify({ "creatorEmail": allPatients ? "" : userDetails.email, "assignedHospitalId": userDetails.roleConfig.roleId }),
+        body: JSON.stringify({ "relatedUserRecordId": allPatients ? "" : userDetails.recordId, "assignedHospitalId": userDetails.roleConfig.roleId }),
         headers: new Headers({
             'Content-Type': 'application/json; charset=UTF-8'
         })
@@ -210,9 +222,9 @@ const fetchHospitals = async() => {
 // Function to load hospitals
 const loadHospitals = (hospitals) => {
     let optionHTML = `<option selected>Select Hospital</option>`;
-    hospitals.map(hospital => {
+    hospitals.map((hospital, i) => {
         let hospitalDetails = JSON.parse(hospital.roleConfig);
-        optionHTML += `<option value="${hospitalDetails.roleId}">${hospitalDetails.roleId} - ${hospitalDetails.name}</option>`;
+        optionHTML += `<option value="${hospitalDetails.roleId}">${hospitalDetails.roleId} - ${hospitalDetails.name} | ${(Math.random() * (i + 1) * (i + 1)).toFixed(2)}kms | C(${hospitalDetails.availableCritical}) M(${hospitalDetails.availableMedium}) N(${hospitalDetails.availableNormal})</option>`;
     })
     document.querySelector("#selectHospital").innerHTML = optionHTML;
 }
@@ -275,33 +287,63 @@ document.querySelectorAll('.dropdown-toggle').forEach(item => {
 
 // Function to load patients data
 const loadPatients = async(patients, hospital) => {
-    let tbodyHTML = ``;
-    allocatedBeds = userDetails.roleConfig.bedCount;
-    await patients.map((patient, i) => {
-        allocatedBeds = patient.allocatedHospitalId === userDetails.roleConfig.roleId ? allocatedBeds - 1 : allocatedBeds;
-        let creatorName = patient.creatorEmail.split('÷');
-        tbodyHTML += `<tr>
+        let fetchUserDetails = await refreshUserDetails();
+        let tbodyHTML = ``;
+        await patients.map((patient, i) => {
+                    tbodyHTML += `<tr>
                         <td>${i + 1}</td>
                         <td>${patient.fullName}</td>
                         <td>${patient.recordId}</td>
-                        ${ hospital ? `<td>${creatorName[1] ? creatorName[1] : creatorName[0]}</td>` : ``}
+                        ${hospital ? `<td>${patient.recordCreatedBy}</td>` : ``}
                         <td>${patient.symptoms}</td>
                         <td>${patient.date}</td>
                         <td>${patient.severity}</td>
                         <td>${patient.allocatedHospitalId ? patient.allocatedHospitalId : "N/A"}</td>
-                        <td id="act${patient.recordId}">${patient.allocatedHospitalId ? 'Allocated' : (hospital ? '<button class="btn btn-sm btn-primary" onclick="allocateHospital(' + patient.recordId + ')">Allocate</button>' : 'Waiting')}</td>
+                        <td id="act${patient.recordId}">${patient.allocatedHospitalId ? (hospital ? '<button class="btn btn-sm btn-danger" onclick="deAllocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Deallocate</button>' : 'Waiting') : (hospital ? '<button class="btn btn-sm btn-primary" onclick="allocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Allocate</button>' : 'Waiting')}</td>
                     </tr>`
     });
-    document.querySelector("#allocatedBedsDisplay").innerHTML = allocatedBeds;
-    document.querySelector("#availableBedsDisplay").innerHTML = userDetails.roleConfig.bedCount - allocatedBeds;
+
     const table = hospital ? "#patientsBedTable" : "#patientsTable";
     $(table).DataTable().destroy();
     document.querySelector(table + "Body").innerHTML = tbodyHTML;
     patientsBedDataTable = $(table).DataTable();
 }
 
+// Function to fetch user details
+const refreshUserDetails = async () => {
+    const response = await fetch("./server/fetchUserDetails.php", {
+        method: 'POST',
+        body: JSON.stringify({
+            "recordId": userDetails.recordId
+        }),
+        headers: new Headers({
+            'Content-Type': 'application/json; charset=UTF-8'
+        })
+    });
+    const jsonRes = await response.json();
+    if (jsonRes.success && jsonRes.isValidUser) {
+        userDetails = jsonRes.users[0];
+        userDetails.fullName = userDetails.firstName + " " + userDetails.lastName;
+        userDetails.roleConfig = JSON.parse(userDetails.roleConfig);
+        if (userDetails.role === "Hospital") {
+            document.querySelector("#totalCritical").innerText = userDetails.roleConfig.totalCritical;
+            document.querySelector("#totalMedium").innerText = userDetails.roleConfig.totalMedium;
+            document.querySelector("#totalNormal").innerText = userDetails.roleConfig.totalNormal;
+            document.querySelector("#availableCritical").innerText = userDetails.roleConfig.availableCritical;
+            document.querySelector("#availableMedium").innerText = userDetails.roleConfig.availableMedium;
+            document.querySelector("#availableNormal").innerText = userDetails.roleConfig.availableNormal;
+            document.querySelector("#allocatedCritical").innerText = userDetails.roleConfig.totalCritical - userDetails.roleConfig.availableCritical;
+            document.querySelector("#allocatedMedium").innerText = userDetails.roleConfig.totalMedium - userDetails.roleConfig.availableMedium;
+            document.querySelector("#allocatedNormal").innerText = userDetails.roleConfig.totalNormal - userDetails.roleConfig.availableNormal;
+        }
+    } else {
+        alert(jsonRes.message);
+    }
+}
+
 // Function to allocate Hospital
-const allocateHospital = async(recordId) => {
+const allocateHospital = async (recordId, severity) => {
+    let fetchUserDetails = await refreshUserDetails();
     const response = await fetch("./server/allocateHospital.php", {
         method: 'POST',
         body: JSON.stringify({ "allocatedHospitalId": userDetails.roleConfig.roleId, "recordId": recordId }),
@@ -311,12 +353,65 @@ const allocateHospital = async(recordId) => {
     });
     const jsonRes = await response.json();
     if (jsonRes.success) {
-        document.querySelector("#act" + recordId).innerText = "Allocated";
-        allocatedBeds -= 1;
-        document.querySelector("#allocatedBedsDisplay").innerHTML = allocatedBeds;
-        document.querySelector("#availableBedsDisplay").innerHTML = userDetails.roleConfig.bedCount - allocatedBeds;
+        document.querySelector("#act" + recordId).innerHTML = `<button class="btn btn-sm btn-danger" onclick="deAllocateHospital(' ${recordId},\'${severity}\'')">Deallocate</button>`;
+        if (severity === 'Critical') {
+            userDetails.roleConfig.availableCritical -= 1;
+        } else if (severity === 'Medium') {
+            userDetails.roleConfig.availableMedium -= 1;
+        } else if (severity === 'Normal') {
+            userDetails.roleConfig.availableNormal -= 1;
+        }
+        updateUserRoleConfig();
         fetchPatients(true);
         clearInputs();
+    } else {
+        alert(jsonRes.message);
+    }
+}
+
+// Function to allocate Hospital
+const deAllocateHospital = async (recordId, severity) => {
+    let fetchUserDetails = await refreshUserDetails();
+    const response = await fetch("./server/deAllocateHospital.php", {
+        method: 'POST',
+        body: JSON.stringify({ "allocatedHospitalId": userDetails.roleConfig.roleId, "recordId": recordId }),
+        headers: new Headers({
+            'Content-Type': 'application/json; charset=UTF-8'
+        })
+    });
+    const jsonRes = await response.json();
+    if (jsonRes.success) {
+        document.querySelector("#act" + recordId).innerHTML = `<button class="btn btn-sm btn-danger" onclick="deAllocateHospital(' ${recordId},\'${severity}\'')">Deallocate</button>`;
+        if (severity === 'Critical') {
+            userDetails.roleConfig.availableCritical += 1;
+        } else if (severity === 'Medium') {
+            userDetails.roleConfig.availableMedium += 1;
+        } else if (severity === 'Normal') {
+            userDetails.roleConfig.availableNormal += 1;
+        }
+        updateUserRoleConfig();
+        fetchPatients(true);
+        clearInputs();
+    } else {
+        alert(jsonRes.message);
+    }
+}
+
+// Function to update roleConfig
+const updateUserRoleConfig = async () => {
+    const response = await fetch("./server/updateUser.php", {
+        method: 'POST',
+        body: JSON.stringify({
+            "recordId": userDetails.recordId,
+            "roleConfig": JSON.stringify(userDetails.roleConfig)
+        }),
+        headers: new Headers({
+            'Content-Type': 'application/json; charset=UTF-8'
+        })
+    });
+    const jsonRes = await response.json();
+    if (jsonRes.success) {
+        let fetchUserDetails = await refreshUserDetails();
     } else {
         alert(jsonRes.message);
     }
@@ -330,7 +425,9 @@ const loadProfileImage = (event) => {
 
 // Toggle display number of fields
 const toggleInput = (hospital) => {
-    document.querySelector("#bedCount").disabled = !hospital;
+    document.querySelector("#bedCountCritical").disabled = !hospital;
+    document.querySelector("#bedCountMedium").disabled = !hospital;
+    document.querySelector("#bedCountNormal").disabled = !hospital;
 }
 
 // Function to show data tables
