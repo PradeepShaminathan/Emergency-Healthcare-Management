@@ -84,10 +84,10 @@ const fetchInputs = (type) => {
                 inputFields.severity = document.querySelector('input[name="patientContion"]:checked').id;
                 inputFields.gender = document.querySelector("#gender").value;
                 let bloodGroup = document.querySelector("#bloodGroup").value;
-                inputFields.bloodGroup = bloodGroup == "Blood Group" ? NULL : bloodGroup;
+                inputFields.bloodGroup = bloodGroup == "Blood Group" ? null : bloodGroup;
                 inputFields.symptoms = document.querySelector("#symptoms").value;
                 let assignedHospital = document.querySelector("#selectHospital").value;
-                inputFields.assignedHospital = assignedHospital.startsWith("H-0") ? assignedHospital : NULL;
+                inputFields.assignedHospital = assignedHospital.startsWith("H-0") ? assignedHospital : null;
                 // image, document
                 break;
             }
@@ -175,7 +175,7 @@ const addPatientDetails = async () => {
     params.relatedUserRecordId = userDetails.recordId;
     params.recordCreatedBy = userDetails.fullName;
     let response;
-    if (patientId != null) {
+    if (patientId != null && patientId.length > 0) {
         params.recordId = patientId;
         response = await fetch("./server/updatePatient.php", {
             method: 'POST',
