@@ -1,6 +1,7 @@
 let userDetails;
 let patientsDataTable;
 let patientsBedDataTable;
+let patientsList;
 
 // Function to clear all input fields
 const clearInputs = () => {
@@ -82,9 +83,11 @@ const fetchInputs = (type) => {
                 inputFields.age = document.querySelector("#age").value;
                 inputFields.severity = document.querySelector('input[name="patientContion"]:checked').id;
                 inputFields.gender = document.querySelector("#gender").value;
-                inputFields.bloodGroup = document.querySelector("#bloodGroup").value;
+                let bloodGroup = document.querySelector("#bloodGroup").value;
+                inputFields.bloodGroup = bloodGroup == "Blood Group" ? NULL : bloodGroup;
                 inputFields.symptoms = document.querySelector("#symptoms").value;
-                inputFields.assignedHospital = document.querySelector("#selectHospital").value;
+                let assignedHospital = document.querySelector("#selectHospital").value;
+                inputFields.assignedHospital = assignedHospital.startsWith("H-0") ? assignedHospital : NULL;
                 // image, document
                 break;
             }
@@ -95,7 +98,7 @@ const fetchInputs = (type) => {
 }
 
 // Function to authenticate user
-const authenticateUser = async() => {
+const authenticateUser = async () => {
     const params = fetchInputs("login");
     const response = await fetch("./server/validateUser.php", {
         method: 'POST',
@@ -129,13 +132,15 @@ const authenticateUser = async() => {
             document.querySelector("#allocatedNormal").innerText = userDetails.roleConfig.totalNormal - userDetails.roleConfig.availableNormal;
         }
         clearInputs();
+        fetchHospitals();
+        fetchPatients(true);
     } else {
         alert(jsonRes.message);
     }
 }
 
 // Function to register user
-const registerUser = async() => {
+const registerUser = async () => {
     const params = fetchInputs("signup");
     const response = await fetch("./server/createUser.php", {
         method: 'POST',
@@ -164,17 +169,31 @@ const logout = () => {
 }
 
 // Function to register patient
-const addPatientDetails = async() => {
+const addPatientDetails = async () => {
     const params = fetchInputs("patient");
+    let patientId = document.querySelector("#patientId").value;
     params.relatedUserRecordId = userDetails.recordId;
     params.recordCreatedBy = userDetails.fullName;
-    const response = await fetch("./server/createPatient.php", {
-        method: 'POST',
-        body: JSON.stringify(params),
-        headers: new Headers({
-            'Content-Type': 'application/json; charset=UTF-8'
-        })
-    });
+    let response;
+    if (patientId != null) {
+        params.recordId = patientId;
+        response = await fetch("./server/updatePatient.php", {
+            method: 'POST',
+            body: JSON.stringify(params),
+            headers: new Headers({
+                'Content-Type': 'application/json; charset=UTF-8'
+            })
+        });
+    } else {
+        response = await fetch("./server/createPatient.php", {
+            method: 'POST',
+            body: JSON.stringify(params),
+            headers: new Headers({
+                'Content-Type': 'application/json; charset=UTF-8'
+            })
+        });
+    }
+
     const jsonRes = await response.json();
     if (jsonRes.success) {
         toggleForm(false);
@@ -185,8 +204,8 @@ const addPatientDetails = async() => {
     }
 }
 
-// Function to register patient
-const fetchPatients = async(allPatients) => {
+// Function to fetch patients of a hospital or clinic
+const fetchPatients = async (allPatients) => {
     const response = await fetch("./server/fetchPatients.php", {
         method: 'POST',
         body: JSON.stringify({ "relatedUserRecordId": allPatients ? "" : userDetails.recordId, "assignedHospitalId": userDetails.roleConfig.roleId }),
@@ -197,6 +216,7 @@ const fetchPatients = async(allPatients) => {
     const jsonRes = await response.json();
     if (jsonRes.success) {
         loadPatients(jsonRes.patients, allPatients);
+        patientsList = jsonRes.patients;
         clearInputs();
     } else {
         alert(jsonRes.message);
@@ -204,7 +224,7 @@ const fetchPatients = async(allPatients) => {
 }
 
 // Function to register patient
-const fetchHospitals = async() => {
+const fetchHospitals = async () => {
     const response = await fetch("./server/fetchHospitals.php", {
         method: 'POST',
         headers: new Headers({
@@ -221,11 +241,12 @@ const fetchHospitals = async() => {
 
 // Function to load hospitals
 const loadHospitals = (hospitals) => {
-    let optionHTML = `<option selected>Select Hospital</option>`;
+    let optionHTML = ``;
     hospitals.map((hospital, i) => {
         let hospitalDetails = JSON.parse(hospital.roleConfig);
         optionHTML += `<option value="${hospitalDetails.roleId}">${hospitalDetails.roleId} - ${hospitalDetails.name} | ${(Math.random() * (i + 1) * (i + 1)).toFixed(2)}kms | C(${hospitalDetails.availableCritical}) M(${hospitalDetails.availableMedium}) N(${hospitalDetails.availableNormal})</option>`;
     })
+    optionHTML = optionHTML == `` ? `<option selected>No Hospitals Available</option>` : optionHTML;
     document.querySelector("#selectHospital").innerHTML = optionHTML;
 }
 
@@ -286,11 +307,11 @@ document.querySelectorAll('.dropdown-toggle').forEach(item => {
 });
 
 // Function to load patients data
-const loadPatients = async(patients, hospital) => {
-        let fetchUserDetails = await refreshUserDetails();
-        let tbodyHTML = ``;
-        await patients.map((patient, i) => {
-                    tbodyHTML += `<tr>
+const loadPatients = async (patients, hospital) => {
+    let fetchUserDetails = await refreshUserDetails();
+    let tbodyHTML = ``;
+    await patients.map((patient, i) => {
+        tbodyHTML += `<tr>
                         <td>${i + 1}</td>
                         <td>${patient.fullName}</td>
                         <td>${patient.recordId}</td>
@@ -299,7 +320,10 @@ const loadPatients = async(patients, hospital) => {
                         <td>${patient.date}</td>
                         <td>${patient.severity}</td>
                         <td>${patient.allocatedHospitalId ? patient.allocatedHospitalId : "N/A"}</td>
-                        <td id="act${patient.recordId}">${patient.allocatedHospitalId ? (hospital ? '<button class="btn btn-sm btn-danger" onclick="deAllocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Deallocate</button>' : 'Waiting') : (hospital ? '<button class="btn btn-sm btn-primary" onclick="allocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Allocate</button>' : 'Waiting')}</td>
+                        <td id="act${patient.recordId}">
+                            ${patient.allocatedHospitalId
+                ? (hospital ? '<button class="btn btn-sm btn-danger" onclick="deAllocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Deallocate</button>' : (patient.oldRecordFlag == 1 ? 'Deallocated' : 'Allocated'))
+                : (hospital ? '<button class="btn btn-sm btn-primary" onclick="allocateHospital(' + patient.recordId + ',\'' + patient.severity + '\')">Allocate</button>' : (patient.oldRecordFlag == 1 ? 'Deallocated' : 'Waiting'))}</td>
                     </tr>`
     });
 
@@ -307,6 +331,35 @@ const loadPatients = async(patients, hospital) => {
     $(table).DataTable().destroy();
     document.querySelector(table + "Body").innerHTML = tbodyHTML;
     patientsBedDataTable = $(table).DataTable();
+}
+
+// Function to fetch individual user details
+const loadPatientDetails = async () => {
+    let patientId = document.querySelector("#patientId").value;
+    const response = await fetch("./server/fetchPatientDetails.php", {
+        method: 'POST',
+        body: JSON.stringify({
+            "recordId": patientId
+        }),
+        headers: new Headers({
+            'Content-Type': 'application/json; charset=UTF-8'
+        })
+    });
+    let jsonRes = await response.json();
+    try {
+        jsonRes = jsonRes.patients[0];
+        document.querySelector("#name").value = jsonRes.fullName;
+        document.querySelector("#address").value = jsonRes.address;
+        document.querySelector("#phoneNumber").value = jsonRes.phoneNumber;
+        document.querySelector("#dob").value = jsonRes.dateOfBirth;
+        document.querySelector("#age").value = calculateAge(jsonRes.dateOfBirth);
+        document.querySelector('#' + jsonRes.severity).checked = true;
+        document.querySelector("#gender").value = jsonRes.gender;
+        document.querySelector("#bloodGroup").value = jsonRes.bloodGroup;
+    } catch (error) {
+        clearInputs();
+        alert("No match found");
+    }
 }
 
 // Function to fetch user details
@@ -428,6 +481,11 @@ const toggleInput = (hospital) => {
     document.querySelector("#bedCountCritical").disabled = !hospital;
     document.querySelector("#bedCountMedium").disabled = !hospital;
     document.querySelector("#bedCountNormal").disabled = !hospital;
+}
+
+// Function to calculate age
+function calculateAge(birthDate) {
+    return Math.floor((new Date() - new Date(birthDate).getTime()) / 3.15576e+10)
 }
 
 // Function to show data tables

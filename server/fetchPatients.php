@@ -6,10 +6,10 @@ $response = OpenCon();
 validateRequest($response, 'POST');
 $reqBody = decodeRequest($response);
 
-$queryFetchPatients = "SELECT * FROM patients;";
+$queryFetchPatients = "SELECT * FROM patients";
 
 if (!empty($reqBody->assignedHospitalId)) {
-    $queryFetchPatients = "SELECT * FROM patients WHERE assignedHospitalId='$reqBody->assignedHospitalId' ORDER BY recordCreationTime;";
+    $queryFetchPatients = "SELECT * FROM patients WHERE oldRecordFlag=0 AND assignedHospitalId='$reqBody->assignedHospitalId' ORDER BY recordCreationTime;";
 }
 
 if (!empty($reqBody->relatedUserRecordId)) {
