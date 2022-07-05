@@ -10,7 +10,7 @@ if (empty($reqBody->date) || empty($reqBody->place) || empty($reqBody->symptoms)
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryCreatePatient = "INSERT INTO `patients` (`date`, `place`, `symptoms`, `severity`, `gender`, `address`, `fullName`, `phoneNumber`, `dateOfBirth`, `bloodGroup`, `medicalReportFile`, `profileImage`, `relatedUserRecordId`, `recordCreatedBy`, `assignedHospitalId`) VALUES ('$reqBody->date', '$reqBody->place', '$reqBody->symptoms', '$reqBody->severity', '$reqBody->gender', '$reqBody->address', '$reqBody->name', '$reqBody->phoneNumber', '$reqBody->dob', '$reqBody->bloodGroup', '{}', '{}', '$reqBody->relatedUserRecordId', '$reqBody->recordCreatedBy', '$reqBody->assignedHospital');";
+    $queryCreatePatient = "INSERT INTO `patients` (`date`, `place`, `symptoms`, `severity`, `gender`, `address`, `fullName`, `phoneNumber`, `dateOfBirth`, `bloodGroup`, `medicalReportFile`, `profileImage`, `relatedUserRecordId`, `recordCreatedBy`, `assignedHospitalId`, `oldRecordFlag`) VALUES ('$reqBody->date', '$reqBody->place', '$reqBody->symptoms', '$reqBody->severity', '$reqBody->gender', '$reqBody->address', '$reqBody->name', '$reqBody->phoneNumber', '$reqBody->dob', '$reqBody->bloodGroup', '{}', '{}', '$reqBody->relatedUserRecordId', '$reqBody->recordCreatedBy', '$reqBody->assignedHospital', 0);";
     try {
         $response->connection->query($queryCreatePatient);
         setResponseStatus($response, true, "Patient creation successful");

@@ -10,7 +10,7 @@ if (empty($reqBody->recordId))
     setResponseStatus($response, false, "Input validation failed");
 
 if ($response->success) {
-    $queryUpdatePatient = "UPDATE `patients` SET `allocatedHospitalId` = NULL WHERE `recordId` = '$reqBody->recordId';";
+    $queryUpdatePatient = "UPDATE `patients` SET `symptoms` = NULL, `allocatedHospitalId` = NULL, `oldRecordFlag` = 1  WHERE `recordId` = '$reqBody->recordId';";
     try {
         $response->connection->query($queryUpdatePatient);
         setResponseStatus($response, true, "Patient updation successful");

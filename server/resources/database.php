@@ -3,15 +3,15 @@
 include 'commons.php';
 function OpenCon()
 {
-    // $dbHost = "localhost";
-    // $dbUser = "root";
-    // $dbPass = "";
-    // $db = "EHCMS";
+    $dbHost = "localhost";
+    $dbUser = "root";
+    $dbPass = "";
+    $db = "EHCMS";
 
-    $dbHost = "b5fqyifh1mj4mi0wuazf-mysql.services.clever-cloud.com";
-    $dbUser = "uowvph8wlo5qjiuh";
-    $dbPass = "1AeEnrwhVUCpfEP2LT0S";
-    $db = "b5fqyifh1mj4mi0wuazf";
+    // $dbHost = "b5fqyifh1mj4mi0wuazf-mysql.services.clever-cloud.com";
+    // $dbUser = "uowvph8wlo5qjiuh";
+    // $dbPass = "1AeEnrwhVUCpfEP2LT0S";
+    // $db = "b5fqyifh1mj4mi0wuazf";
 
     $response = new StdClass();
     try {

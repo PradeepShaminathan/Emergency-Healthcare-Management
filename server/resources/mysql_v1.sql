@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `EHCMS`.`patients`(
     `recordId` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `date` VARCHAR(50) NOT NULL,
     `place` VARCHAR(50) NOT NULL,
-    `symptoms` VARCHAR(500) NOT NULL,
+    `symptoms` VARCHAR(500) NULL,
     `severity` VARCHAR(20) NOT NULL,
     `gender` VARCHAR(10) NOT NULL,
     `address` VARCHAR(250) NOT NULL,
@@ -35,5 +35,6 @@ CREATE TABLE IF NOT EXISTS `EHCMS`.`patients`(
     `assignedHospitalId` VARCHAR(50) DEFAULT NULL,
     `recordCreationTime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `recordLastUpdatedTime` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `oldRecordFlag` INT NOT NULL,
     FOREIGN KEY(`relatedUserRecordId`) REFERENCES users(`recordId`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8;
