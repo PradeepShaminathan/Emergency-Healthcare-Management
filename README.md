@@ -6,13 +6,10 @@ An app used to monitor patients
 
 ![Login Page](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/Login.png)
 
-![Signup Page](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/SignUp.png)
+![Signup Page](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/RegisterUser.png)
 
-![Hospital Home Page](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/HospitalHome.png)
+![Hospital Home Page](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/RegisterPatient_H.png)
 
-![Hospital Patient Details](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/HospitalPatientList.png)
+![Hospital Patient Details](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/ViewPatients_H.png)
 
 ![Hospital Bed Allocation](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/HospitalBed.png)
-
-![Clinic Home](https://github.com/PradeepShaminathan/Emergency-Healthcare-Management/blob/main/screeenshots/ClinicHome.png)
-
