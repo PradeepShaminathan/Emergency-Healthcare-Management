@@ -244,7 +244,7 @@ const loadHospitals = (hospitals) => {
     let optionHTML = ``;
     hospitals.map((hospital, i) => {
         let hospitalDetails = JSON.parse(hospital.roleConfig);
-        optionHTML += `<option value="${hospitalDetails.roleId}">${hospitalDetails.roleId} - ${hospitalDetails.name} | ${(Math.random() * (i + 1) * (i + 1)).toFixed(2)}kms | C(${hospitalDetails.availableCritical}) M(${hospitalDetails.availableMedium}) N(${hospitalDetails.availableNormal})</option>`;
+        optionHTML += `<option value="${hospitalDetails.roleId}">${hospitalDetails.roleId} - ${hospitalDetails.name} | C(${hospitalDetails.availableCritical}) M(${hospitalDetails.availableMedium}) N(${hospitalDetails.availableNormal})</option>`;
     })
     optionHTML = optionHTML == `` ? `<option selected>No Hospitals Available</option>` : optionHTML;
     document.querySelector("#selectHospital").innerHTML = optionHTML;
